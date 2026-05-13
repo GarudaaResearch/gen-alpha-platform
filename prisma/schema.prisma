@@ -1,0 +1,141 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  PARENT
+  EDUCATOR
+  COUNSELOR
+  CLINICIAN
+  RESEARCHER
+  CHILD
+}
+
+enum AgeGroup {
+  AGE_5_7
+  AGE_8_10
+  AGE_11_14
+}
+
+enum AssessmentTool {
+  SCARED
+  SDQ
+  PHQ_A
+  CONNERS
+  DSIC
+}
+
+enum RespondentType {
+  SELF
+  PARENT
+  TEACHER
+}
+
+enum RiskLevel {
+  LOW
+  MODERATE
+  HIGH
+  CRISIS
+}
+
+enum ResourceCategory {
+  ARTICLE
+  TOOLKIT
+  VIDEO
+  RESEARCH_PAPER
+}
+
+enum StressTrigger {
+  ZOOM_CLASS
+  TEST
+  HOMEWORK
+  SOCIAL
+  OTHER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  role          UserRole
+  profile       Profile?
+  children      Child[]
+  assessments   Assessment[] @relation("AdministeredBy")
+  createdAt     DateTime  @default(now())
+}
+
+model Profile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  firstName String?
+  lastName  String?
+}
+
+model Child {
+  id              String   @id @default(cuid())
+  anonymousCode   String   @unique  // No PII stored for minors
+  ageGroup        AgeGroup
+  diagnosisFlags  String[] // ["DYSLEXIA", "ADHD", "DYSCALCULIA", etc.]
+  guardianId      String
+  guardian        User     @relation(fields: [guardianId], references: [id])
+  assessments     Assessment[]
+  moodLogs        MoodLog[]
+  stressEvents    StressEvent[]
+}
+
+model Assessment {
+  id            String         @id @default(cuid())
+  toolName      AssessmentTool
+  respondentType RespondentType
+  responses     Json           // Flexible schema per tool
+  scoredResult  Json           // Computed subscale scores
+  riskLevel     RiskLevel      // LOW | MODERATE | HIGH | CRISIS
+  completedAt   DateTime       @default(now())
+  childId       String
+  child         Child          @relation(fields: [childId], references: [id])
+  administeredById String
+  administeredBy User          @relation("AdministeredBy", fields: [administeredById], references: [id])
+}
+
+model MoodLog {
+  id          String   @id @default(cuid())
+  childId     String
+  child       Child    @relation(fields: [childId], references: [id])
+  mood        Int      // 1-5 emoji scale
+  energyLevel Int      // 1-5
+  digitalHours Float   // screen time self-report
+  note        String?  // free text (AI-monitored for safety)
+  createdAt   DateTime @default(now())
+}
+
+model StressEvent {
+  id          String   @id @default(cuid())
+  childId     String
+  child       Child    @relation(fields: [childId], references: [id])
+  trigger     StressTrigger
+  intensity   Int      // 1-10 VAS
+  copingUsed  String[]
+  resolvedAt  DateTime?
+}
+
+model Resource {
+  id          String   @id @default(cuid())
+  title       String
+  category    ResourceCategory
+  audience    UserRole[]
+  ageRange    AgeGroup[]
+  tags        String[]
+  content     String   // MDX
+  clinicallyReviewed Boolean @default(false)
+  reviewedBy  String?  // Clinician ID
+  language    String   @default("en")
+  createdAt   DateTime @default(now())
+}

@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-calm-teal: #2D9CDB;
+  --color-warm-amber: #F2994A;
+  --color-healing-sage: #6FCF97;
+  --color-soft-lavender: #9B51E0;
+  --color-crisis-alert: #EB5757;
+  --color-caution: #F2C94C;
+  --color-safe: #27AE60;
+  --color-background: #F8F7F4;
+  --color-surface: #FFFFFF;
+  --color-text-primary: #1A1A2E;
+  --color-text-secondary: #64748B;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-lora font-semibold tracking-tight;
+  }
+
+  p {
+    @apply leading-relaxed;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg px-6 py-3 font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
+  }
+  
+  .btn-primary {
+    @apply bg-calm-teal text-white hover:bg-opacity-90 shadow-sm hover:shadow-md;
+  }
+  
+  .btn-secondary {
+    @apply bg-surface text-calm-teal border border-calm-teal hover:bg-calm-teal hover:text-white;
+  }
+
+  .card {
+    @apply bg-surface rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-lg transition-shadow duration-300;
+  }
+
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-md border border-white/20 rounded-2xl p-6 shadow-xl;
+  }
+}
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-calm-teal to-soft-lavender;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-background;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full hover:bg-gray-400 transition-colors;
+}
